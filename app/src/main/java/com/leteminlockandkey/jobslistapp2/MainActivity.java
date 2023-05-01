@@ -2,6 +2,11 @@ package com.leteminlockandkey.jobslistapp2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.icu.text.DateFormat;
+import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -11,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,7 +44,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -69,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
         listView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,new ArrayList<String>()));
         PullXMLData theData = new PullXMLData();
         theData.execute();
+        //Log.d("doesitrun",Integer.toString(listView.getAdapter().getCount()));
+
+        //Log.d("gofar?","yep");
+        //listView.getChildAt(1).setBackgroundColor(Color.MAGENTA);
         if (findViewById(R.id.job_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
@@ -110,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         protected String doInBackground(String... params){
             String xml = null;
             try {
-                URL url = new URL("http://www.leteminlockandkey.com/AppsFolder/mobilesearch.php");
+                URL url = new URL("http://www.leteminlockandkey.com/AppsFolder/JobsListResponse.php");
                 HttpURLConnection con = (HttpURLConnection)url.openConnection();
                 int statusCode = con.getResponseCode();
                 if (statusCode ==  200) {
@@ -134,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
                 if (getValue(e, "Status").equals("Work Order")) {
                     map.put("ID", getValue(e, "ID"));
                     map.put("Name", getValue(e, "Name"));
+                    map.put("ETAStart", getValue(e,"ETAStart"));
+//                    map.put("Requirements", getValue(e,"Requirements"));
                     JobItemDetails newJob = new JobItemDetails();
                     newJob.setID(getValue(e, "ID"));
                     newJob.setName(getValue(e, "Name"));
@@ -142,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                     newJob.setMake(getValue(e, "Make"));
                     newJob.setModel(getValue(e, "Model"));
                     newJob.setETAStart(getValue(e, "ETAStart"));
-                    newJob.setETAEnd(getValue(e,"ETAEnd"));
+//                    newJob.setETAEnd(getValue(e,"ETAEnd"));
                     newJob.setComments(getValue(e, "Comments"));
                     newJob.setPhonenumber(getValue(e, "Phonenumber"));
                     newJob.setAddress(getValue(e, "Address"));
@@ -153,8 +168,67 @@ public class MainActivity extends AppCompatActivity {
                     thisJobDetail.add(newJob);
                     // adding HashList to ArrayList
                     JobItems.add(map);
-                    adapter.add(map.get("Name"));
+                    String ETAOutput = " ";
+                    try {
+                        DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, hh:mm aaa");
+                        SimpleDateFormat dateNoTime = new SimpleDateFormat("EEE");
+                        SimpleDateFormat TimeNoDate = new SimpleDateFormat("hh:mm aaa");
+                        Date date = inputFormat.parse(map.get("ETAStart"));
+                        String tnd = TimeNoDate.format(date);
+                        if (tnd.equals("12:00 AM"))
+                        {
+                            ETAOutput = dateNoTime.format(date);
+                        }
+                        else
+                        {
+                            ETAOutput = dateFormat.format(date);
+                        }
+                    }
+                    catch (ParseException pe) {}
+                    String remote = "";
+                    if (!newJob.getRequirements().isEmpty())
+                    {
+                        remote = "\uD83D\uDCE6";
+                    }
+                    //String remote = Character.toChars(unicode);
+                    adapter.add(map.get("Name")+"   "+ETAOutput+"   "+remote);
+
+                    //listView.getAdapter().getView(1,listView.getChildAt(1),listView).setBackgroundColor(Color.MAGENTA);
+                   /* if (!newJob.getRequirements().isEmpty())
+                    {
+                        adapter.getView(i, listView.getChildAt(i), listView).setAlpha(1.0f);
+                        adapter.getView(i, listView.getChildAt(i), listView).setBackgroundColor(Color.MAGENTA);
+                        adapter.notifyDataSetChanged();
+                        String message = i + ", " + "Requirements was not empty";
+                        Log.d("Req test",message);
+                        //listView.getAdapter().getView(i, listView.getChildAt(i), listView).setBackgroundColor(Color.MAGENTA);
+                        listView.getChildAt(2).setBackgroundColor(Color.MAGENTA);
+//                        listView.setBackgroundColor(Color.MAGENTA);
+                    }*/
                 }
+            }
+            for (int i = 0; i < listView.getAdapter().getCount(); i++)
+            {
+                //Log.d("checkum",Integer.toString(i));
+                if (!thisJobDetail.get(i).getRequirements().isEmpty())
+                {
+                    int oldcolor = Color.TRANSPARENT;
+                    Drawable bg = listView.getAdapter().getView(i,null,listView).getBackground();
+                    if (bg instanceof ColorDrawable)
+                        oldcolor = ((ColorDrawable) bg).getColor();
+                    Log.d("oldcolor",Integer.toString(oldcolor));
+                    int magcolor = Color.MAGENTA;
+                    Log.d("magcolor",Integer.toString(magcolor));
+                    listView.getAdapter().getView(i,null,listView).setBackgroundColor(Color.MAGENTA);
+                    int newcolor = Color.TRANSPARENT;
+                    Drawable bgnew = listView.getAdapter().getView(i,null,listView).getBackground();
+                    if (bgnew instanceof ColorDrawable)
+                        newcolor = ((ColorDrawable) bg).getColor();
+                    Log.d("newcolor",Integer.toString(newcolor));
+                }
+                else
+                    Log.d("nocolor",Integer.toString(i));
             }
         }
     }

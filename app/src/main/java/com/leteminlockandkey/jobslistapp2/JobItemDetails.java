@@ -20,7 +20,7 @@ public class JobItemDetails implements Parcelable {
     private String Address;
     private String Requirements;
     private String ETAStart;
-    private String ETAEnd;
+//    private String ETAEnd;
     private String Status;
     private String Quote;
     private String Referred;
@@ -84,8 +84,8 @@ public class JobItemDetails implements Parcelable {
     }
     public void setETAStart (String ETAStart){this.ETAStart = ETAStart;}
     public String getETAStart() {return ETAStart;}
-    public void setETAEnd (String ETAEnd){this.ETAEnd = ETAEnd;}
-    public String getETAEnd() {return ETAEnd;}
+//    public void setETAEnd (String ETAEnd){this.ETAEnd = ETAEnd;}
+//    public String getETAEnd() {return ETAEnd;}
     public void setStatus (String Status){
         this.Status = Status;
     }
@@ -123,7 +123,7 @@ public class JobItemDetails implements Parcelable {
         out.writeString(Address);
         out.writeString(Requirements);
         out.writeString(ETAStart);
-        out.writeString(ETAEnd);
+//        out.writeString(ETAEnd);
         out.writeString(Status);
         out.writeString(Quote);
         out.writeString(Referred);
@@ -150,7 +150,7 @@ public class JobItemDetails implements Parcelable {
         Address = in.readString();
         Requirements = in.readString();
         ETAStart = in.readString();
-        ETAEnd = in.readString();
+//        ETAEnd = in.readString();
         Status = in.readString();
         Quote = in.readString();
         Referred = in.readString();

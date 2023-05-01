@@ -44,17 +44,10 @@
         android:textSize="20sp"
         />
     <TextView
-        android:id="@+id/endeta_detail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/starteta_detail"
-        android:textSize="20sp"
-        />
-    <TextView
         android:id="@+id/quote_detail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/endeta_detail"
+        android:layout_below="@id/starteta_detail"
         android:textSize="20sp"
         />
     <TextView

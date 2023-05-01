@@ -3,7 +3,10 @@ package com.leteminlockandkey.jobslistapp2;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.icu.text.DateFormat;
+import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +17,8 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -24,8 +29,10 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class EditItem extends AppCompatActivity {
@@ -39,7 +46,8 @@ public class EditItem extends AppCompatActivity {
     EditText address;
     EditText requirements;
     EditText etastart;
-    EditText etaend;
+    EditText etastarttime;
+  //  EditText etaend;
     Spinner status;
     EditText quote;
     EditText referred;
@@ -55,7 +63,7 @@ public class EditItem extends AppCompatActivity {
     String TempAddress;
     String TempRequirements;
     String TempETAStart;
-    String TempETAEnd;
+//    String TempETAEnd;
     String TempStatus;
     String TempQuote;
     String TempReferred;
@@ -84,7 +92,14 @@ public class EditItem extends AppCompatActivity {
         requirements = (EditText) findViewById(R.id.editTextRequirements);
         requirements.setText(detailsOfSelectedJob.getRequirements());
         etastart = (EditText) findViewById(R.id.editTextETAStart);
-        etastart.setText(detailsOfSelectedJob.getETAStart());
+        try {
+            DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd ");
+            Date date = inputFormat.parse(detailsOfSelectedJob.getETAStart());
+            String ETAOutput = dateFormat.format(date);
+            etastart.setText (ETAOutput);
+        }
+        catch (ParseException e) {}
         etastart.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
@@ -102,7 +117,7 @@ public class EditItem extends AppCompatActivity {
                         selectedmonth = selectedmonth + 1;
                         String selectedmonthtext = " ";
                         String selecteddaytext = " ";
-                        String timeplaceholder = " 00:00:00";
+                        String timeplaceholder = " ";
                         if (selectedmonth < 10){
                             selectedmonthtext = "0"+Integer.toString(selectedmonth);
                         } else selectedmonthtext = Integer.toString(selectedmonth);
@@ -116,7 +131,32 @@ public class EditItem extends AppCompatActivity {
                 mDatePicker.show();
                 }
             });
-            etaend = (EditText) findViewById(R.id.editTextETAEnd);
+            etastarttime = (EditText) findViewById(R.id.editTextETAStartTime);
+        try {
+            DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+            Date date = inputFormat.parse(detailsOfSelectedJob.getETAStart());
+            String ETAOutput = dateFormat.format(date);
+            etastarttime.setText (ETAOutput);
+        }
+        catch (ParseException e) {}
+            etastarttime.setOnClickListener(new View.OnClickListener(){
+             @Override
+             public void onClick(View v) {
+                Calendar mcurrentDate = Calendar.getInstance();
+                int mHour = mcurrentDate.get(Calendar.HOUR_OF_DAY);
+                int mMinute = mcurrentDate.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(com.leteminlockandkey.jobslistapp2.EditItem.this, new TimePickerDialog.OnTimeSetListener() {
+                    public void onTimeSet(TimePicker timepicker, int selectedhour, int selectedminute) {
+                        //boolean is24hour = true;
+                        etastarttime.setText(selectedhour + ":" + selectedminute + ":00");
+                    }
+                }, mHour, mMinute, true);
+                mTimePicker.setTitle("Select Time");
+                mTimePicker.show();
+            }});
+    /*        etaend = (EditText) findViewById(R.id.editTextETAEnd);
             etaend.setText(detailsOfSelectedJob.getETAEnd());
             etaend.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -131,7 +171,7 @@ public class EditItem extends AppCompatActivity {
                 mDatePicker = new DatePickerDialog(com.leteminlockandkey.jobslistapp2.EditItem.this, new DatePickerDialog.OnDateSetListener() {
                     public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
                         // TODO Auto-generated method stub
-                /*      Your code   to get date and time    */
+                /*      Your code   to get date and time    *//*
                         selectedmonth = selectedmonth + 1;
                         String selectedmonthtext = " ";
                         String selecteddaytext = " ";
@@ -148,7 +188,7 @@ public class EditItem extends AppCompatActivity {
                 mDatePicker.setTitle("Select Date");
                 mDatePicker.show();
             }
-        });
+        });*/
         status = (Spinner) findViewById(R.id.spinnerStatus);
         status.getOnItemSelectedListener();
         List<String> statuses = new ArrayList<String>();
@@ -173,7 +213,7 @@ public class EditItem extends AppCompatActivity {
                 }else {
                     GetData();
                     InsertData(TempID, TempName, TempJob, TempYear, TempMake, TempModel, TempComments,
-                            TempPhonenumber, TempAddress, TempRequirements, TempETAStart, TempETAEnd,
+                            TempPhonenumber, TempAddress, TempRequirements, TempETAStart,
                             TempStatus, TempQuote, TempReferred);
                 }
             }
@@ -191,8 +231,8 @@ public class EditItem extends AppCompatActivity {
         TempPhonenumber = phonenumber.getText().toString();
         TempAddress = address.getText().toString();
         TempRequirements = requirements.getText().toString();
-        TempETAStart = etastart.getText().toString();
-        TempETAEnd = etaend.getText().toString();
+        TempETAStart = etastart.getText().toString()+etastarttime.getText().toString();
+    //    TempETAEnd = etaend.getText().toString();
         TempStatus = status.getSelectedItem().toString();
         TempQuote = quote.getText().toString();
         TempReferred = referred.getText().toString();
@@ -221,7 +261,7 @@ public class EditItem extends AppCompatActivity {
     }
     public void InsertData(final String id, final String name, final String job, final String year, final String make,
                            final String model, final String comments, final String phonenumber,
-                           final String address, final String requirements, final String etastart, final String etaend,
+                           final String address, final String requirements, final String etastart,
                            final String status, final String quote, final String referred){
         class SendPost extends AsyncTask<String, Void, String> {
             @Override
@@ -265,7 +305,7 @@ public class EditItem extends AppCompatActivity {
                 String addressHolder = address;
                 String requirementsHolder = requirements;
                 String etastartHolder = etastart;
-                String etaendHolder = etaend;
+                //String etaendHolder = etaend;
                 //              String starttimemilHolder = starttimemil;
                 //            String endtimemilHolder = endtimemil;
                 String statusHolder = status;
@@ -292,7 +332,7 @@ public class EditItem extends AppCompatActivity {
                             URLEncoder.encode("Address","UTF-8")+"="+URLEncoder.encode(addressHolder,"UTF-8")+"&"+
                             URLEncoder.encode("Requirements","UTF-8")+"="+URLEncoder.encode(requirementsHolder,"UTF-8")+"&"+
                             URLEncoder.encode("ETAStart","UTF-8")+"="+URLEncoder.encode(etastartHolder,"UTF-8")+"&"+
-                            URLEncoder.encode("ETAEnd","UTF-8")+"="+URLEncoder.encode(etaendHolder,"UTF-8")+"&"+
+                            //URLEncoder.encode("ETAEnd","UTF-8")+"="+URLEncoder.encode(etaendHolder,"UTF-8")+"&"+
                             //            URLEncoder.encode("Starttimemil","UTF-8")+"="+URLEncoder.encode(starttimemilHolder,"UTF-8")+"&"+
                             //          URLEncoder.encode("Endtimemeil","UTF-8")+"="+URLEncoder.encode(endtimemilHolder,"UTF-8")+"&"+
                             URLEncoder.encode("Status","UTF-8")+"="+URLEncoder.encode(statusHolder,"UTF-8")+"&"+
